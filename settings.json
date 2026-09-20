@@ -8,7 +8,7 @@
   "server": {
     "ip": "FabricCraftx.aternos.me",
     "port": 41262,
-    "version": "1.21.11"
+    "version": "1.21.10"
   },
   "position": {
     "enabled": true,
