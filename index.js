@@ -4,14 +4,14 @@ const { GoalBlock } = goals;
 const config = require('./settings.json');
 const express = require('express');
 const http = require('http');
+const https = require('https');
 
 // ============================================================
-// EXPRESS SERVER - Keep Render/Aternos alive
+// EXPRESS SERVER
 // ============================================================
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Bot state tracking
 let botState = {
   connected: false,
   lastActivity: Date.now(),
@@ -30,16 +30,17 @@ app.get('/', (req, res) => {
       <head>
         <title>${config.name} Status</title>
         <meta name="viewport" content="width=device-width, initial-scale=1">
+
         <style>
-          body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            background: #0f172a; 
-            color: #f8fafc; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            height: 100vh; 
-            margin: 0; 
+          body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0f172a;
+            color: #f8fafc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
             overflow: hidden;
           }
 
@@ -107,9 +108,20 @@ app.get('/', (req, res) => {
           }
 
           @keyframes pulse {
-            0% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.5; transform: scale(1.1); }
-            100% { opacity: 1; transform: scale(1); }
+            0% {
+              opacity: 1;
+              transform: scale(1);
+            }
+
+            50% {
+              opacity: 0.5;
+              transform: scale(1.1);
+            }
+
+            100% {
+              opacity: 1;
+              transform: scale(1);
+            }
           }
 
           .btn-guide {
@@ -140,40 +152,57 @@ app.get('/', (req, res) => {
           }
 
           @keyframes loading {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(100%); }
+            0% {
+              transform: translateX(-100%);
+            }
+
+            100% {
+              transform: translateX(100%);
+            }
           }
         </style>
       </head>
 
       <body>
+
         <div class="container" id="main-container">
+
           <h1>
-            <span id="live-indicator"
+            <span
+              id="live-indicator"
               class="status-dot pulse"
               style="color: #ef4444;">
             </span>
+
             ${config.name}
           </h1>
 
           <div class="stat-card">
             <div class="label">Status</div>
-            <div class="value" id="status-text">Connecting...</div>
+            <div class="value" id="status-text">
+              Connecting...
+            </div>
           </div>
 
           <div class="stat-card">
             <div class="label">Uptime</div>
-            <div class="value" id="uptime-text">0h 0m 0s</div>
+            <div class="value" id="uptime-text">
+              0h 0m 0s
+            </div>
           </div>
 
           <div class="stat-card">
             <div class="label">Coordinates</div>
-            <div class="value" id="coords-text">Waiting...</div>
+            <div class="value" id="coords-text">
+              Waiting...
+            </div>
           </div>
 
           <div class="stat-card">
             <div class="label">Server</div>
-            <div class="value">${config.server.ip}</div>
+            <div class="value">
+              ${config.server.ip}
+            </div>
           </div>
 
           <a href="/tutorial" class="btn-guide">
@@ -187,20 +216,29 @@ app.get('/', (req, res) => {
           <p style="color:#64748b;font-size:12px;margin-top:15px;">
             Live connection to Bot Process
           </p>
+
         </div>
 
         <script>
+
           const formatUptime = (seconds) => {
+
             const h = Math.floor(seconds / 3600);
             const m = Math.floor((seconds % 3600) / 60);
             const s = seconds % 60;
+
             return \`\${h}h \${m}m \${s}s\`;
           };
 
           const updateStats = async () => {
+
             try {
-              const res = await fetch('/health');
-              const data = await res.json();
+
+              const res =
+                await fetch('/health');
+
+              const data =
+                await res.json();
 
               const statusText =
                 document.getElementById('status-text');
@@ -218,20 +256,29 @@ app.get('/', (req, res) => {
                 document.getElementById('main-container');
 
               if (data.status === 'connected') {
+
                 statusText.innerHTML =
                   '<span class="status-dot" style="color:#4ade80;"></span> Online & Running';
 
-                statusText.style.color = '#2dd4bf';
-                liveDot.style.color = '#4ade80';
+                statusText.style.color =
+                  '#2dd4bf';
+
+                liveDot.style.color =
+                  '#4ade80';
 
                 container.style.boxShadow =
                   '0 0 50px rgba(45, 212, 191, 0.2)';
+
               } else {
+
                 statusText.innerHTML =
                   '<span class="status-dot" style="color:#f87171;"></span> Reconnecting...';
 
-                statusText.style.color = '#f87171';
-                liveDot.style.color = '#f87171';
+                statusText.style.color =
+                  '#f87171';
+
+                liveDot.style.color =
+                  '#f87171';
 
                 container.style.boxShadow =
                   '0 0 50px rgba(248, 113, 113, 0.2)';
@@ -241,36 +288,57 @@ app.get('/', (req, res) => {
                 formatUptime(data.uptime);
 
               if (data.coords) {
+
                 coordsText.innerText =
                   \`Coords: \${Math.floor(data.coords.x)}, \${Math.floor(data.coords.y)}, \${Math.floor(data.coords.z)}\`;
+
               } else {
+
                 coordsText.innerText =
                   'Unknown Location';
               }
 
             } catch (e) {
-              document.getElementById('status-text').innerText =
+
+              document.getElementById(
+                'status-text'
+              ).innerText =
                 'System Offline';
 
-              document.getElementById('live-indicator').style.color =
+              document.getElementById(
+                'live-indicator'
+              ).style.color =
                 '#64748b';
             }
           };
 
           setInterval(updateStats, 1000);
+
           updateStats();
+
         </script>
+
       </body>
     </html>
   `);
 });
 
+// ============================================================
+// TUTORIAL
+// ============================================================
 app.get('/tutorial', (req, res) => {
+
   res.send(`
     <html>
+
       <head>
-        <title>${config.name} - Setup Guide</title>
+
+        <title>
+          ${config.name} - Setup Guide
+        </title>
+
         <style>
+
           body {
             font-family: 'Segoe UI', sans-serif;
             background: #0f172a;
@@ -281,7 +349,8 @@ app.get('/tutorial', (req, res) => {
             line-height: 1.6;
           }
 
-          h1, h2 {
+          h1,
+          h2 {
             color: #2dd4bf;
           }
 
@@ -304,90 +373,192 @@ app.get('/tutorial', (req, res) => {
             border-radius: 4px;
             color: #e2e8f0;
           }
+
         </style>
+
       </head>
 
       <body>
-        <a href="/">Back to Dashboard</a>
 
-        <h1>Setup Guide</h1>
+        <a href="/">
+          Back to Dashboard
+        </a>
+
+        <h1>
+          Setup Guide
+        </h1>
 
         <div class="card">
-          <h2>Step 1: Configure Aternos</h2>
+
+          <h2>
+            Step 1: Configure Aternos
+          </h2>
+
           <ol>
-            <li>Go to <strong>Aternos</strong>.</li>
-            <li>Install <strong>Paper/Bukkit</strong>.</li>
-            <li>Enable <strong>Cracked</strong>.</li>
-            <li>Install ViaVersion, ViaBackwards and ViaRewind.</li>
+
+            <li>
+              Go to <strong>Aternos</strong>.
+            </li>
+
+            <li>
+              Install <strong>Paper/Bukkit</strong>.
+            </li>
+
+            <li>
+              Enable <strong>Cracked</strong>.
+            </li>
+
+            <li>
+              Install ViaVersion, ViaBackwards and ViaRewind.
+            </li>
+
           </ol>
+
         </div>
 
         <div class="card">
-          <h2>Step 2: GitHub Setup</h2>
+
+          <h2>
+            Step 2: GitHub Setup
+          </h2>
+
           <ol>
-            <li>Upload the bot files.</li>
-            <li>Edit <code>settings.json</code>.</li>
-            <li>Upload the files to GitHub.</li>
+
+            <li>
+              Upload the bot files.
+            </li>
+
+            <li>
+              Edit <code>settings.json</code>.
+            </li>
+
+            <li>
+              Upload the files to GitHub.
+            </li>
+
           </ol>
+
         </div>
 
         <div class="card">
-          <h2>Step 3: Render</h2>
+
+          <h2>
+            Step 3: Render
+          </h2>
+
           <ol>
-            <li>Create a Web Service.</li>
-            <li>Connect GitHub.</li>
-            <li>Build Command: <code>npm install</code></li>
-            <li>Start Command: <code>npm start</code></li>
+
+            <li>
+              Create a Web Service.
+            </li>
+
+            <li>
+              Connect GitHub.
+            </li>
+
+            <li>
+              Build Command:
+              <code>npm install</code>
+            </li>
+
+            <li>
+              Start Command:
+              <code>npm start</code>
+            </li>
+
           </ol>
+
         </div>
+
       </body>
+
     </html>
   `);
 });
 
+// ============================================================
+// HEALTH
+// ============================================================
 app.get('/health', (req, res) => {
+
   res.json({
-    status: botState.connected ? 'connected' : 'disconnected',
-    uptime: Math.floor(
-      (Date.now() - botState.startTime) / 1000
-    ),
+
+    status:
+      botState.connected
+        ? 'connected'
+        : 'disconnected',
+
+    uptime:
+      Math.floor(
+        (Date.now() - botState.startTime) / 1000
+      ),
+
     coords:
       (bot && bot.entity)
         ? bot.entity.position
         : null,
-    lastActivity: botState.lastActivity,
-    reconnectAttempts: botState.reconnectAttempts,
+
+    lastActivity:
+      botState.lastActivity,
+
+    reconnectAttempts:
+      botState.reconnectAttempts,
+
     memoryUsage:
-      process.memoryUsage().heapUsed / 1024 / 1024
+      process.memoryUsage().heapUsed /
+      1024 /
+      1024
   });
 });
 
+// ============================================================
+// PING
+// ============================================================
 app.get('/ping', (req, res) => {
   res.send('pong');
 });
 
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(
-    `[Server] HTTP server started on port ${PORT}`
-  );
-});
+app.listen(
+  PORT,
+  '0.0.0.0',
+  () => {
 
+    console.log(
+      `[Server] HTTP server started on port ${PORT}`
+    );
+
+  }
+);
+
+// ============================================================
+// FORMAT UPTIME
+// ============================================================
 function formatUptime(seconds) {
-  const h = Math.floor(seconds / 3600);
-  const m = Math.floor((seconds % 3600) / 60);
-  const s = seconds % 60;
+
+  const h =
+    Math.floor(seconds / 3600);
+
+  const m =
+    Math.floor(
+      (seconds % 3600) / 60
+    );
+
+  const s =
+    seconds % 60;
 
   return `${h}h ${m}m ${s}s`;
 }
 
 // ============================================================
-// SELF-PING
+// SELF PING
 // ============================================================
-const SELF_PING_INTERVAL = 10 * 60 * 1000;
-const https = require('https');
+const SELF_PING_INTERVAL =
+  10 * 60 * 1000;
 
 function startSelfPing() {
+
   setInterval(() => {
+
     const url =
       process.env.RENDER_EXTERNAL_URL ||
       `http://localhost:${PORT}`;
@@ -397,11 +568,14 @@ function startSelfPing() {
         ? https
         : http;
 
-    protocol.get(`${url}/ping`, () => {})
+    protocol
+      .get(`${url}/ping`, () => {})
       .on('error', (err) => {
+
         console.log(
           `[KeepAlive] Self-ping failed: ${err.message}`
         );
+
       });
 
   }, SELF_PING_INTERVAL);
@@ -414,50 +588,449 @@ function startSelfPing() {
 startSelfPing();
 
 // ============================================================
-// MEMORY MONITORING
+// MEMORY MONITOR
 // ============================================================
 setInterval(() => {
-  const mem = process.memoryUsage();
-  const heapMB =
-    (mem.heapUsed / 1024 / 1024).toFixed(2);
 
-  console.log(`[Memory] Heap: ${heapMB} MB`);
+  const mem =
+    process.memoryUsage();
+
+  const heapMB =
+    (
+      mem.heapUsed /
+      1024 /
+      1024
+    ).toFixed(2);
+
+  console.log(
+    `[Memory] Heap: ${heapMB} MB`
+  );
+
 }, 5 * 60 * 1000);
 
 // ============================================================
-// BOT CREATION
+// BOT VARIABLES
 // ============================================================
 let bot = null;
+
 let activeIntervals = [];
+
 let reconnectTimeout = null;
+
 let isReconnecting = false;
 
+// ============================================================
+// CLEAR INTERVALS
+// ============================================================
 function clearAllIntervals() {
+
   console.log(
     `[Cleanup] Clearing ${activeIntervals.length} intervals`
   );
 
-  activeIntervals.forEach(id => clearInterval(id));
+  activeIntervals.forEach(
+    id => clearInterval(id)
+  );
+
   activeIntervals = [];
 }
 
+// ============================================================
+// ADD INTERVAL
+// ============================================================
 function addInterval(callback, delay) {
-  const id = setInterval(callback, delay);
+
+  const id =
+    setInterval(
+      callback,
+      delay
+    );
+
   activeIntervals.push(id);
+
   return id;
 }
 
+// ============================================================
+// RECONNECT DELAY
+// ============================================================
 function getReconnectDelay() {
+
   const baseDelay =
-    config.utils['auto-reconnect-delay'] || 2000;
+    config.utils['auto-reconnect-delay'] ||
+    2000;
 
   const maxDelay =
-    config.utils['max-reconnect-delay'] || 15000;
+    config.utils['max-reconnect-delay'] ||
+    15000;
 
   return Math.min(
     baseDelay +
-    (botState.reconnectAttempts * 1000),
+    (
+      botState.reconnectAttempts *
+      1000
+    ),
     maxDelay
+  );
+}
+
+// ============================================================
+// 1.21.11 CONFIGURATION FIX
+// ============================================================
+//
+// Paper 1.21.11 sends select_known_packs during the
+// CONFIGURATION phase.
+//
+// Mineflayer currently does not always answer it correctly.
+//
+// We echo the received packs back to the server.
+//
+// ============================================================
+function setupConfigurationFix(bot) {
+
+  if (
+    !bot ||
+    !bot._client
+  ) {
+    return;
+  }
+
+  // ----------------------------------------------------------
+  // SELECT KNOWN PACKS
+  // ----------------------------------------------------------
+  bot._client.on(
+    'select_known_packs',
+    (data) => {
+
+      try {
+
+        const packs =
+          Array.isArray(data?.packs)
+            ? data.packs
+            : [];
+
+        console.log(
+          `[Config] select_known_packs received (${packs.length} packs)`
+        );
+
+        bot._client.write(
+          'select_known_packs',
+          {
+            packs: packs
+          }
+        );
+
+        console.log(
+          '[Config] select_known_packs response sent.'
+        );
+
+      } catch (err) {
+
+        console.log(
+          '[Config] select_known_packs error:',
+          err.message
+        );
+
+      }
+
+    }
+  );
+
+  // ----------------------------------------------------------
+  // FINISH CONFIGURATION
+  // ----------------------------------------------------------
+  bot._client.on(
+    'finish_configuration',
+    () => {
+
+      console.log(
+        '[Config] Server requested finish_configuration.'
+      );
+
+    }
+  );
+}
+
+// ============================================================
+// RESOURCE PACK FIX
+// ============================================================
+//
+// IMPORTANT:
+//
+// We intentionally DO NOT use:
+// bot.acceptResourcePack()
+// bot.denyResourcePack()
+//
+// Paper 1.21.11 + Mineflayer can have UUID problems here.
+//
+// Instead we use the UUID exactly as received from the
+// server and send:
+//
+// 3 = ACCEPTED
+// 0 = SUCCESSFULLY_LOADED
+//
+// This lets the bot continue without actually downloading
+// the optional pack.
+//
+// ============================================================
+function setupResourcePackFix(bot) {
+
+  if (
+    !bot ||
+    !bot._client
+  ) {
+    return;
+  }
+
+  let handledUUIDs =
+    new Set();
+
+  function normalizeUUID(uuid) {
+
+    if (
+      uuid === undefined ||
+      uuid === null
+    ) {
+      return null;
+    }
+
+    try {
+
+      if (
+        typeof uuid === 'string'
+      ) {
+        return uuid;
+      }
+
+      if (
+        typeof uuid.toString === 'function'
+      ) {
+        return uuid.toString();
+      }
+
+    } catch (e) {}
+
+    return String(uuid);
+  }
+
+  function sendResourcePackStatus(
+    packet
+  ) {
+
+    if (
+      !packet
+    ) {
+      return;
+    }
+
+    let uuid =
+      normalizeUUID(
+        packet.uuid
+      );
+
+    // --------------------------------------------------------
+    // 1.21.11 uses UUID.
+    // --------------------------------------------------------
+    if (
+      uuid
+    ) {
+
+      if (
+        handledUUIDs.has(uuid)
+      ) {
+        return;
+      }
+
+      handledUUIDs.add(uuid);
+
+      console.log(
+        `[ResourcePack] Optional pack detected: ${uuid}`
+      );
+
+      try {
+
+        // ACCEPTED
+        bot._client.write(
+          'resource_pack_receive',
+          {
+            uuid: uuid,
+            result: 3
+          }
+        );
+
+        console.log(
+          '[ResourcePack] ACCEPTED response sent.'
+        );
+
+      } catch (err) {
+
+        console.log(
+          '[ResourcePack] ACCEPTED error:',
+          err.message
+        );
+
+        handledUUIDs.delete(uuid);
+
+        return;
+      }
+
+      // ------------------------------------------------------
+      // SUCCESSFULLY_LOADED
+      // ------------------------------------------------------
+      setTimeout(() => {
+
+        try {
+
+          if (
+            !bot ||
+            !bot._client
+          ) {
+            return;
+          }
+
+          bot._client.write(
+            'resource_pack_receive',
+            {
+              uuid: uuid,
+              result: 0
+            }
+          );
+
+          console.log(
+            '[ResourcePack] SUCCESSFULLY_LOADED response sent.'
+          );
+
+        } catch (err) {
+
+          console.log(
+            '[ResourcePack] SUCCESSFULLY_LOADED error:',
+            err.message
+          );
+
+        }
+
+      }, 1000);
+
+      return;
+    }
+
+    // --------------------------------------------------------
+    // Legacy fallback
+    // --------------------------------------------------------
+    if (
+      packet.hash !== undefined
+    ) {
+
+      console.log(
+        '[ResourcePack] Legacy resource pack detected.'
+      );
+
+      try {
+
+        bot._client.write(
+          'resource_pack_receive',
+          {
+            hash: packet.hash,
+            result: 3
+          }
+        );
+
+        setTimeout(() => {
+
+          try {
+
+            bot._client.write(
+              'resource_pack_receive',
+              {
+                hash: packet.hash,
+                result: 0
+              }
+            );
+
+          } catch (err) {
+
+            console.log(
+              '[ResourcePack] Legacy completion error:',
+              err.message
+            );
+
+          }
+
+        }, 1000);
+
+      } catch (err) {
+
+        console.log(
+          '[ResourcePack] Legacy response error:',
+          err.message
+        );
+
+      }
+    }
+  }
+
+  // ----------------------------------------------------------
+  // Modern 1.20.3+ / 1.21.x
+  // ----------------------------------------------------------
+  bot._client.on(
+    'add_resource_pack',
+    (packet) => {
+
+      console.log(
+        '[ResourcePack] add_resource_pack received.'
+      );
+
+      sendResourcePackStatus(
+        packet
+      );
+
+    }
+  );
+
+  // ----------------------------------------------------------
+  // Legacy
+  // ----------------------------------------------------------
+  bot._client.on(
+    'resource_pack_send',
+    (packet) => {
+
+      console.log(
+        '[ResourcePack] resource_pack_send received.'
+      );
+
+      sendResourcePackStatus(
+        packet
+      );
+
+    }
+  );
+
+  // ----------------------------------------------------------
+  // Mineflayer event
+  // ----------------------------------------------------------
+  bot.on(
+    'resourcePack',
+    (url, hash, uuid) => {
+
+      console.log(
+        '[ResourcePack] Mineflayer resourcePack event received.'
+      );
+
+      console.log(
+        '[ResourcePack] Optional pack will NOT be downloaded.'
+      );
+
+      if (
+        uuid
+      ) {
+
+        sendResourcePackStatus({
+          uuid: uuid
+        });
+
+      }
+
+    }
   );
 }
 
@@ -466,24 +1039,42 @@ function getReconnectDelay() {
 // ============================================================
 function createBot() {
 
-  if (isReconnecting) {
+  if (
+    isReconnecting
+  ) {
+
     console.log(
       '[Bot] Already reconnecting, skipping...'
     );
+
     return;
   }
 
-  if (bot) {
+  if (
+    bot
+  ) {
+
     clearAllIntervals();
 
     try {
+
       bot.removeAllListeners();
+
+      if (
+        bot._client
+      ) {
+        bot._client.removeAllListeners();
+      }
+
       bot.end();
+
     } catch (e) {
+
       console.log(
         '[Cleanup] Error ending previous bot:',
         e.message
       );
+
     }
 
     bot = null;
@@ -499,428 +1090,340 @@ function createBot() {
 
   try {
 
-    bot = mineflayer.createBot({
-      username:
-        config['bot-account'].username,
+    bot =
+      mineflayer.createBot({
 
-      password:
-        config['bot-account'].password || undefined,
+        username:
+          config['bot-account'].username,
 
-      auth:
-        config['bot-account'].type,
+        password:
+          config['bot-account'].password ||
+          undefined,
 
-      host:
-        config.server.ip,
+        auth:
+          config['bot-account'].type,
 
-      port:
-        config.server.port,
+        host:
+          config.server.ip,
 
-      version:
-        config.server.version,
+        port:
+          config.server.port,
 
-      hideErrors:
-        false,
+        version:
+          config.server.version,
 
-      checkTimeoutInterval:
-        120000
-    });
+        hideErrors:
+          false,
 
-    // ========================================================
-    // RESOURCE PACK HANDLING
-    // ========================================================
-    //
-    // Server Resource Pack is OPTIONAL.
-    //
-    // We do NOT download the pack.
-    // We send a direct protocol response when possible.
-    //
-    // This is important for Minecraft 1.21.11 because
-    // Mineflayer's normal denyResourcePack() currently has
-    // known issues during the CONFIGURATION phase.
-    // ========================================================
+        checkTimeoutInterval:
+          120000
 
-    function declineResourcePackPacket(packet) {
-
-      console.log(
-        '[ResourcePack] Optional Resource Pack detected.'
-      );
-
-      try {
-
-        if (
-          bot &&
-          bot._client &&
-          typeof bot._client.write === 'function'
-        ) {
-
-          const response = {
-            result: 1
-          };
-
-          if (
-            packet &&
-            packet.uuid !== undefined
-          ) {
-            response.uuid = packet.uuid;
-          }
-
-          if (
-            packet &&
-            packet.hash !== undefined &&
-            response.uuid === undefined
-          ) {
-            response.hash = packet.hash;
-          }
-
-          try {
-            bot._client.write(
-              'resource_pack_receive',
-              response
-            );
-
-            console.log(
-              '[ResourcePack] Resource Pack declined.'
-            );
-
-          } catch (packetError) {
-
-            console.log(
-              '[ResourcePack] Direct response failed:',
-              packetError.message
-            );
-
-            // Fallback to Mineflayer API
-            try {
-              if (
-                typeof bot.denyResourcePack ===
-                'function'
-              ) {
-                bot.denyResourcePack();
-
-                console.log(
-                  '[ResourcePack] Fallback decline sent.'
-                );
-              }
-            } catch (fallbackError) {
-              console.log(
-                '[ResourcePack] Fallback failed:',
-                fallbackError.message
-              );
-            }
-          }
-
-        } else {
-
-          console.log(
-            '[ResourcePack] Client not ready for direct response.'
-          );
-
-        }
-
-      } catch (err) {
-
-        console.log(
-          '[ResourcePack] Handler error:',
-          err.message
-        );
-      }
-    }
+      });
 
     // ========================================================
-    // Modern 1.20.3+ packet
+    // IMPORTANT 1.21.11 FIXES
     // ========================================================
-    if (bot._client) {
+    setupConfigurationFix(bot);
 
-      bot._client.on(
-        'add_resource_pack',
-        (packet) => {
-
-          console.log(
-            '[ResourcePack] add_resource_pack received.'
-          );
-
-          declineResourcePackPacket(packet);
-        }
-      );
-
-      // ======================================================
-      // Legacy packet
-      // ======================================================
-      bot._client.on(
-        'resource_pack_send',
-        (packet) => {
-
-          console.log(
-            '[ResourcePack] resource_pack_send received.'
-          );
-
-          declineResourcePackPacket(packet);
-        }
-      );
-    }
+    setupResourcePackFix(bot);
 
     // ========================================================
-    // Mineflayer Resource Pack event
+    // PATHFINDER
     // ========================================================
-    bot.on(
-      'resourcePack',
-      (url, hash) => {
-
-        console.log(
-          '[ResourcePack] Mineflayer resourcePack event received.'
-        );
-
-        console.log(
-          '[ResourcePack] Ignoring optional pack.'
-        );
-
-        // Do not download it.
-        // The packet listeners above handle the response.
-
-        try {
-          if (
-            typeof bot.denyResourcePack ===
-            'function'
-          ) {
-            // Only use as fallback if the client is still
-            // using the older resource-pack mechanism.
-            console.log(
-              '[ResourcePack] Optional pack detected.'
-            );
-          }
-        } catch (e) {
-          console.log(
-            '[ResourcePack] Event handler:',
-            e.message
-          );
-        }
-      }
+    bot.loadPlugin(
+      pathfinder
     );
-
-    // ========================================================
-    // Pathfinder
-    // ========================================================
-    bot.loadPlugin(pathfinder);
 
     // ========================================================
     // CONNECTION TIMEOUT
     // ========================================================
-    const connectionTimeout = setTimeout(() => {
+    const connectionTimeout =
+      setTimeout(() => {
 
-      if (!botState.connected) {
+        if (
+          !botState.connected
+        ) {
 
-        console.log(
-          '[Bot] Connection timeout - no spawn received'
-        );
+          console.log(
+            '[Bot] Connection timeout - no spawn received.'
+          );
 
-        scheduleReconnect();
-      }
+          scheduleReconnect();
 
-    }, 60000);
+        }
+
+      }, 60000);
 
     // ========================================================
     // SPAWN
     // ========================================================
-    bot.once('spawn', () => {
+    bot.once(
+      'spawn',
+      () => {
 
-      clearTimeout(connectionTimeout);
-
-      botState.connected = true;
-      botState.lastActivity = Date.now();
-      botState.reconnectAttempts = 0;
-      isReconnecting = false;
-
-      console.log(
-        '[Bot] [+] Successfully spawned on server!'
-      );
-
-      // ======================================================
-      // LOGIN
-      // ======================================================
-      bot.on('messagestr', (msg) => {
-
-        const message =
-          msg.toLowerCase();
-
-        if (
-          message.includes('login')
-        ) {
-          bot.chat('/login Perzuu');
-
-          console.log(
-            '[Auth] Login detected'
-          );
-        }
-
-        if (
-          message.includes('register')
-        ) {
-          bot.chat(
-            '/register Perzuu Perzuu'
-          );
-
-          console.log(
-            '[Auth] Register detected'
-          );
-        }
-
-        if (
-          message.includes(
-            'commands.gamemode.success.self'
-          ) ||
-          message.includes(
-            'set own game mode to creative mode'
-          )
-        ) {
-
-          console.log(
-            '[INFO] Bot is now in Creative Mode.'
-          );
-
-          bot.chat(
-            '/gamerule sendCommandFeedback false'
-          );
-        }
-
-      });
-
-      // ======================================================
-      // DISCORD
-      // ======================================================
-      if (
-        config.discord &&
-        config.discord.events &&
-        config.discord.events.connect
-      ) {
-
-        sendDiscordWebhook(
-          `[+] **Connected** to \`${config.server.ip}\``,
-          0x4ade80
+        clearTimeout(
+          connectionTimeout
         );
+
+        botState.connected =
+          true;
+
+        botState.lastActivity =
+          Date.now();
+
+        botState.reconnectAttempts =
+          0;
+
+        isReconnecting =
+          false;
+
+        console.log(
+          '[Bot] [+] Successfully spawned on server!'
+        );
+
+        // ----------------------------------------------------
+        // LOGIN
+        // ----------------------------------------------------
+        bot.on(
+          'messagestr',
+          (msg) => {
+
+            const message =
+              msg.toLowerCase();
+
+            if (
+              message.includes('login')
+            ) {
+
+              bot.chat(
+                '/login Perzuu'
+              );
+
+              console.log(
+                '[Auth] Login detected'
+              );
+            }
+
+            if (
+              message.includes('register')
+            ) {
+
+              bot.chat(
+                '/register Perzuu Perzuu'
+              );
+
+              console.log(
+                '[Auth] Register detected'
+              );
+            }
+
+            if (
+              message.includes(
+                'commands.gamemode.success.self'
+              ) ||
+              message.includes(
+                'set own game mode to creative mode'
+              )
+            ) {
+
+              console.log(
+                '[INFO] Bot is now in Creative Mode.'
+              );
+
+              bot.chat(
+                '/gamerule sendCommandFeedback false'
+              );
+            }
+
+          }
+        );
+
+        // ----------------------------------------------------
+        // DISCORD
+        // ----------------------------------------------------
+        if (
+          config.discord &&
+          config.discord.events &&
+          config.discord.events.connect
+        ) {
+
+          sendDiscordWebhook(
+            `[+] **Connected** to \`${config.server.ip}\``,
+            0x4ade80
+          );
+
+        }
+
+        // ----------------------------------------------------
+        // MINECRAFT DATA
+        // ----------------------------------------------------
+        let mcData;
+
+        try {
+
+          mcData =
+            require('minecraft-data')(
+              config.server.version
+            );
+
+        } catch (err) {
+
+          console.log(
+            '[MinecraftData] Failed:',
+            err.message
+          );
+
+          return;
+        }
+
+        const defaultMove =
+          new Movements(
+            bot,
+            mcData
+          );
+
+        initializeModules(
+          bot,
+          mcData,
+          defaultMove
+        );
+
+        setupLeaveRejoin(
+          bot,
+          createBot
+        );
+
+        // ----------------------------------------------------
+        // GAMERULE
+        // ----------------------------------------------------
+        setTimeout(() => {
+
+          if (
+            bot &&
+            botState.connected
+          ) {
+
+            bot.chat(
+              '/gamerule sendCommandFeedback false'
+            );
+
+          }
+
+        }, 3000);
+
+        // ----------------------------------------------------
+        // CREATIVE
+        // ----------------------------------------------------
+        setTimeout(() => {
+
+          if (
+            bot &&
+            botState.connected
+          ) {
+
+            bot.chat(
+              '/gamemode creative'
+            );
+
+            console.log(
+              '[INFO] Attempted to set creative mode (requires OP)'
+            );
+
+          }
+
+        }, 3000);
+
       }
-
-      // ======================================================
-      // MINECRAFT DATA
-      // ======================================================
-      const mcData =
-        require('minecraft-data')(
-          config.server.version
-        );
-
-      const defaultMove =
-        new Movements(bot, mcData);
-
-      initializeModules(
-        bot,
-        mcData,
-        defaultMove
-      );
-
-      setupLeaveRejoin(
-        bot,
-        createBot
-      );
-
-      setTimeout(() => {
-
-        if (
-          bot &&
-          botState.connected
-        ) {
-
-          bot.chat(
-            '/gamerule sendCommandFeedback false'
-          );
-        }
-
-      }, 3000);
-
-      setTimeout(() => {
-
-        if (
-          bot &&
-          botState.connected
-        ) {
-
-          bot.chat('/gamemode creative');
-
-          console.log(
-            '[INFO] Attempted to set creative mode (requires OP)'
-          );
-        }
-
-      }, 3000);
-
-    });
+    );
 
     // ========================================================
     // DISCONNECT
     // ========================================================
-    bot.on('end', (reason) => {
+    bot.on(
+      'end',
+      (reason) => {
 
-      console.log(
-        `[Bot] Disconnected: ${reason || 'Unknown reason'}`
-      );
-
-      botState.connected = false;
-
-      clearAllIntervals();
-
-      if (
-        config.discord &&
-        config.discord.events &&
-        config.discord.events.disconnect &&
-        reason !== 'Periodic Rejoin'
-      ) {
-
-        sendDiscordWebhook(
-          `[-] **Disconnected**: ${reason || 'Unknown'}`,
-          0xf87171
+        console.log(
+          `[Bot] Disconnected: ${reason || 'Unknown reason'}`
         );
-      }
 
-      if (
-        config.utils['auto-reconnect']
-      ) {
-        scheduleReconnect();
-      }
+        botState.connected =
+          false;
 
-    });
+        clearAllIntervals();
+
+        if (
+          config.discord &&
+          config.discord.events &&
+          config.discord.events.disconnect &&
+          reason !== 'Periodic Rejoin'
+        ) {
+
+          sendDiscordWebhook(
+            `[-] **Disconnected**: ${reason || 'Unknown'}`,
+            0xf87171
+          );
+
+        }
+
+        if (
+          config.utils['auto-reconnect']
+        ) {
+
+          scheduleReconnect();
+
+        }
+
+      }
+    );
 
     // ========================================================
     // KICK
     // ========================================================
-    bot.on('kicked', (reason) => {
+    bot.on(
+      'kicked',
+      (reason) => {
 
-      console.log(
-        '[KICK]',
-        typeof reason === 'string'
-          ? reason
-          : JSON.stringify(
-              reason,
-              null,
-              2
-            )
-      );
+        console.log(
+          '[KICK]',
+          typeof reason === 'string'
+            ? reason
+            : JSON.stringify(
+                reason,
+                null,
+                2
+              )
+        );
 
-    });
+      }
+    );
 
     // ========================================================
     // ERROR
     // ========================================================
-    bot.on('error', (err) => {
+    bot.on(
+      'error',
+      (err) => {
 
-      console.log(
-        `[Bot] Error: ${err.message}`
-      );
+        console.log(
+          `[Bot] Error: ${err.message}`
+        );
 
-      botState.errors.push({
-        type: 'error',
-        message: err.message,
-        time: Date.now()
-      });
+        botState.errors.push({
 
-    });
+          type:
+            'error',
+
+          message:
+            err.message,
+
+          time:
+            Date.now()
+
+        });
+
+      }
+    );
 
   } catch (err) {
 
@@ -937,15 +1440,24 @@ function createBot() {
 // ============================================================
 function scheduleReconnect() {
 
-  if (reconnectTimeout) {
-    clearTimeout(reconnectTimeout);
+  if (
+    reconnectTimeout
+  ) {
+
+    clearTimeout(
+      reconnectTimeout
+    );
+
   }
 
-  if (isReconnecting) {
+  if (
+    isReconnecting
+  ) {
     return;
   }
 
-  isReconnecting = true;
+  isReconnecting =
+    true;
 
   botState.reconnectAttempts++;
 
@@ -959,7 +1471,8 @@ function scheduleReconnect() {
   reconnectTimeout =
     setTimeout(() => {
 
-      isReconnecting = false;
+      isReconnecting =
+        false;
 
       createBot();
 
@@ -982,50 +1495,62 @@ function initializeModules(
   // ========================================================
   // AUTO AUTH
   // ========================================================
-  let authDone = false;
+  let authDone =
+    false;
 
-  bot.on('messagestr', (msg) => {
+  bot.on(
+    'messagestr',
+    (msg) => {
 
-    const message =
-      msg.toLowerCase();
+      const message =
+        msg.toLowerCase();
 
-    if (authDone) return;
+      if (
+        authDone
+      ) {
+        return;
+      }
 
-    if (
-      message.includes('/register') ||
-      message.includes('register')
-    ) {
+      if (
+        message.includes('/register') ||
+        message.includes('register')
+      ) {
 
-      authDone = true;
+        authDone =
+          true;
 
-      bot.chat(
-        '/register Perzuu Perzuu'
-      );
+        bot.chat(
+          '/register Perzuu Perzuu'
+        );
 
-      console.log(
-        '[Auth] Register sent'
-      );
+        console.log(
+          '[Auth] Register sent'
+        );
 
-      return;
+        return;
+      }
+
+      if (
+        message.includes('/login') ||
+        message.includes('login')
+      ) {
+
+        authDone =
+          true;
+
+        bot.chat(
+          '/login Perzuu'
+        );
+
+        console.log(
+          '[Auth] Login sent'
+        );
+
+        return;
+      }
+
     }
-
-    if (
-      message.includes('/login') ||
-      message.includes('login')
-    ) {
-
-      authDone = true;
-
-      bot.chat('/login Perzuu');
-
-      console.log(
-        '[Auth] Login sent'
-      );
-
-      return;
-    }
-
-  });
+  );
 
   // ========================================================
   // MOVE TO POSITION
@@ -1045,6 +1570,7 @@ function initializeModules(
         config.position.z
       )
     );
+
   }
 
   // ========================================================
@@ -1068,11 +1594,15 @@ function initializeModules(
 
         setTimeout(() => {
 
-          if (bot) {
+          if (
+            bot
+          ) {
+
             bot.setControlState(
               'jump',
               false
             );
+
           }
 
         }, 100);
@@ -1091,6 +1621,7 @@ function initializeModules(
         'sneak',
         true
       );
+
     }
   }
 
@@ -1105,20 +1636,27 @@ function initializeModules(
       bot,
       defaultMove
     );
+
   }
 
   if (
     config.movement['random-jump'].enabled
   ) {
 
-    startRandomJump(bot);
+    startRandomJump(
+      bot
+    );
+
   }
 
   if (
     config.movement['look-around'].enabled
   ) {
 
-    startLookAround(bot);
+    startLookAround(
+      bot
+    );
+
   }
 
   // ========================================================
@@ -1127,31 +1665,43 @@ function initializeModules(
   if (
     config.modules.avoidMobs
   ) {
-    avoidMobs(bot);
+
+    avoidMobs(
+      bot
+    );
+
   }
 
   if (
     config.modules.combat
   ) {
+
     combatModule(
       bot,
       mcData
     );
+
   }
 
   if (
     config.modules.beds
   ) {
+
     bedModule(
       bot,
       mcData
     );
+
   }
 
   if (
     config.modules.chat
   ) {
-    chatModule(bot);
+
+    chatModule(
+      bot
+    );
+
   }
 
   // ========================================================
@@ -1162,7 +1712,10 @@ function initializeModules(
     config.utils['periodic-rejoin'].enabled
   ) {
 
-    periodicRejoin(bot);
+    periodicRejoin(
+      bot
+    );
+
   }
 
   console.log(
@@ -1176,11 +1729,14 @@ function initializeModules(
 const setupLeaveRejoin =
   require('./leaveRejoin');
 
-function periodicRejoin(bot) {
+function periodicRejoin(
+  bot
+) {
 
   console.log(
     '[Rejoin] Using new leaveRejoin system.'
   );
+
 }
 
 // ============================================================
@@ -1194,8 +1750,11 @@ function startCircleWalk(
   const radius =
     config.movement['circle-walk'].radius;
 
-  let angle = 0;
-  let lastPathTime = 0;
+  let angle =
+    0;
+
+  let lastPathTime =
+    0;
 
   addInterval(() => {
 
@@ -1206,7 +1765,8 @@ function startCircleWalk(
       return;
     }
 
-    const now = Date.now();
+    const now =
+      Date.now();
 
     if (
       now - lastPathTime < 2000
@@ -1214,17 +1774,20 @@ function startCircleWalk(
       return;
     }
 
-    lastPathTime = now;
+    lastPathTime =
+      now;
 
     try {
 
       const x =
         bot.entity.position.x +
-        Math.cos(angle) * radius;
+        Math.cos(angle) *
+        radius;
 
       const z =
         bot.entity.position.z +
-        Math.sin(angle) * radius;
+        Math.sin(angle) *
+        radius;
 
       bot.pathfinder.setMovements(
         defaultMove
@@ -1240,7 +1803,8 @@ function startCircleWalk(
         )
       );
 
-      angle += Math.PI / 4;
+      angle +=
+        Math.PI / 4;
 
       botState.lastActivity =
         Date.now();
@@ -1251,6 +1815,7 @@ function startCircleWalk(
         '[CircleWalk] Error:',
         e.message
       );
+
     }
 
   }, config.movement['circle-walk'].speed);
@@ -1259,7 +1824,9 @@ function startCircleWalk(
 // ============================================================
 // RANDOM JUMP
 // ============================================================
-function startRandomJump(bot) {
+function startRandomJump(
+  bot
+) {
 
   addInterval(() => {
 
@@ -1279,11 +1846,15 @@ function startRandomJump(bot) {
 
       setTimeout(() => {
 
-        if (bot) {
+        if (
+          bot
+        ) {
+
           bot.setControlState(
             'jump',
             false
           );
+
         }
 
       }, 300);
@@ -1297,6 +1868,7 @@ function startRandomJump(bot) {
         '[RandomJump] Error:',
         e.message
       );
+
     }
 
   }, config.movement['random-jump'].interval);
@@ -1305,7 +1877,9 @@ function startRandomJump(bot) {
 // ============================================================
 // LOOK AROUND
 // ============================================================
-function startLookAround(bot) {
+function startLookAround(
+  bot
+) {
 
   addInterval(() => {
 
@@ -1324,8 +1898,12 @@ function startLookAround(bot) {
         2;
 
       const pitch =
-        (Math.random() - 0.5) *
-        Math.PI / 4;
+        (
+          Math.random() -
+          0.5
+        ) *
+        Math.PI /
+        4;
 
       bot.look(
         yaw,
@@ -1342,6 +1920,7 @@ function startLookAround(bot) {
         '[LookAround] Error:',
         e.message
       );
+
     }
 
   }, config.movement['look-around'].interval);
@@ -1350,9 +1929,12 @@ function startLookAround(bot) {
 // ============================================================
 // AVOID MOBS / PLAYERS
 // ============================================================
-function avoidMobs(bot) {
+function avoidMobs(
+  bot
+) {
 
-  const safeDistance = 5;
+  const safeDistance =
+    5;
 
   addInterval(() => {
 
@@ -1368,19 +1950,22 @@ function avoidMobs(bot) {
       const entities =
         Object.values(
           bot.entities
-        ).filter(e =>
-          e.type === 'mob' ||
-          (
-            e.type === 'player' &&
-            e.username !== bot.username
-          )
+        ).filter(
+          e =>
+            e.type === 'mob' ||
+            (
+              e.type === 'player' &&
+              e.username !== bot.username
+            )
         );
 
       for (
         const e of entities
       ) {
 
-        if (!e.position) {
+        if (
+          !e.position
+        ) {
           continue;
         }
 
@@ -1400,11 +1985,15 @@ function avoidMobs(bot) {
 
           setTimeout(() => {
 
-            if (bot) {
+            if (
+              bot
+            ) {
+
               bot.setControlState(
                 'back',
                 false
               );
+
             }
 
           }, 500);
@@ -1419,6 +2008,7 @@ function avoidMobs(bot) {
         '[AvoidMobs] Error:',
         e.message
       );
+
     }
 
   }, 2000);
@@ -1450,12 +2040,13 @@ function combatModule(
         const mobs =
           Object.values(
             bot.entities
-          ).filter(e =>
-            e.type === 'mob' &&
-            e.position &&
-            bot.entity.position.distanceTo(
-              e.position
-            ) < 4
+          ).filter(
+            e =>
+              e.type === 'mob' &&
+              e.position &&
+              bot.entity.position.distanceTo(
+                e.position
+              ) < 4
           );
 
         if (
@@ -1465,7 +2056,9 @@ function combatModule(
           bot.attack(
             mobs[0]
           );
+
         }
+
       }
 
     } catch (e) {
@@ -1474,65 +2067,81 @@ function combatModule(
         '[Combat] Error:',
         e.message
       );
+
     }
 
   }, 1500);
 
-  bot.on('health', () => {
-
-    if (
-      !config.combat['auto-eat']
-    ) {
-      return;
-    }
-
-    try {
+  bot.on(
+    'health',
+    () => {
 
       if (
-        bot.food < 14
+        !config.combat['auto-eat']
       ) {
-
-        const food =
-          bot.inventory.items().find(i => {
-
-            const itemData =
-              mcData.itemsByName[
-                i.name
-              ];
-
-            return (
-              itemData &&
-              itemData.food
-            );
-          });
-
-        if (food) {
-
-          bot.equip(
-            food,
-            'hand'
-          )
-          .then(() =>
-            bot.consume()
-          )
-          .catch(e =>
-            console.log(
-              '[AutoEat] Error:',
-              e.message
-            )
-          );
-        }
+        return;
       }
 
-    } catch (e) {
+      try {
 
-      console.log(
-        '[AutoEat] Error:',
-        e.message
-      );
+        if (
+          bot.food < 14
+        ) {
+
+          const food =
+            bot.inventory
+              .items()
+              .find(
+                i => {
+
+                  const itemData =
+                    mcData.itemsByName[
+                      i.name
+                    ];
+
+                  return (
+                    itemData &&
+                    itemData.food
+                  );
+
+                }
+              );
+
+          if (
+            food
+          ) {
+
+            bot.equip(
+              food,
+              'hand'
+            )
+            .then(
+              () =>
+                bot.consume()
+            )
+            .catch(
+              e =>
+                console.log(
+                  '[AutoEat] Error:',
+                  e.message
+                )
+            );
+
+          }
+
+        }
+
+      } catch (e) {
+
+        console.log(
+          '[AutoEat] Error:',
+          e.message
+        );
+
+      }
+
     }
-
-  });
+  );
 }
 
 // ============================================================
@@ -1543,67 +2152,79 @@ function bedModule(
   mcData
 ) {
 
-  addInterval(async () => {
-
-    if (
-      !bot ||
-      !botState.connected
-    ) {
-      return;
-    }
-
-    try {
-
-      const isNight =
-        bot.time.timeOfDay >= 12500 &&
-        bot.time.timeOfDay <= 23500;
+  addInterval(
+    async () => {
 
       if (
-        config.beds['place-night'] &&
-        isNight &&
-        !bot.isSleeping
+        !bot ||
+        !botState.connected
       ) {
-
-        const bedBlock =
-          bot.findBlock({
-            matching: block =>
-              block.name.includes('bed'),
-            maxDistance: 8
-          });
-
-        if (bedBlock) {
-
-          try {
-
-            await bot.sleep(
-              bedBlock
-            );
-
-            console.log(
-              '[Bed] Sleeping...'
-            );
-
-          } catch (e) {
-            // Ignore sleep failure
-          }
-        }
+        return;
       }
 
-    } catch (e) {
+      try {
 
-      console.log(
-        '[Bed] Error:',
-        e.message
-      );
-    }
+        const isNight =
+          bot.time.timeOfDay >= 12500 &&
+          bot.time.timeOfDay <= 23500;
 
-  }, 10000);
+        if (
+          config.beds['place-night'] &&
+          isNight &&
+          !bot.isSleeping
+        ) {
+
+          const bedBlock =
+            bot.findBlock({
+              matching:
+                block =>
+                  block.name.includes('bed'),
+              maxDistance:
+                8
+            });
+
+          if (
+            bedBlock
+          ) {
+
+            try {
+
+              await bot.sleep(
+                bedBlock
+              );
+
+              console.log(
+                '[Bed] Sleeping...'
+              );
+
+            } catch (e) {
+              // Ignore sleep failure
+            }
+
+          }
+
+        }
+
+      } catch (e) {
+
+        console.log(
+          '[Bed] Error:',
+          e.message
+        );
+
+      }
+
+    },
+    10000
+  );
 }
 
 // ============================================================
 // CHAT
 // ============================================================
-function chatModule(bot) {
+function chatModule(
+  bot
+) {
 
   bot.on(
     'chat',
@@ -1633,6 +2254,7 @@ function chatModule(bot) {
             bot.chat(
               `Hello, ${username}!`
             );
+
           }
 
           if (
@@ -1642,12 +2264,18 @@ function chatModule(bot) {
             const target =
               message.split(' ')[1];
 
-            if (target) {
+            if (
+              target
+            ) {
+
               bot.chat(
                 `/tp ${target}`
               );
+
             }
+
           }
+
         }
 
       } catch (e) {
@@ -1656,7 +2284,9 @@ function chatModule(bot) {
           '[Chat] Error:',
           e.message
         );
+
       }
+
     }
   );
 }
@@ -1669,74 +2299,89 @@ const readline =
 
 const rl =
   readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-    terminal: false
+
+    input:
+      process.stdin,
+
+    output:
+      process.stdout,
+
+    terminal:
+      false
+
   });
 
-rl.on('line', (line) => {
+rl.on(
+  'line',
+  (line) => {
 
-  if (
-    !bot ||
-    !botState.connected
-  ) {
+    if (
+      !bot ||
+      !botState.connected
+    ) {
 
-    console.log(
-      '[Console] Bot not connected'
-    );
+      console.log(
+        '[Console] Bot not connected'
+      );
 
-    return;
+      return;
+    }
+
+    const trimmed =
+      line.trim();
+
+    if (
+      trimmed.startsWith('say ')
+    ) {
+
+      bot.chat(
+        trimmed.slice(4)
+      );
+
+    } else if (
+      trimmed.startsWith('cmd ')
+    ) {
+
+      bot.chat(
+        '/' +
+        trimmed.slice(4)
+      );
+
+    } else if (
+      trimmed === 'status'
+    ) {
+
+      console.log(
+        `Connected: ${botState.connected}, Uptime: ${formatUptime(
+          Math.floor(
+            (
+              Date.now() -
+              botState.startTime
+            ) / 1000
+          )
+        )}`
+      );
+
+    } else if (
+      trimmed === 'reconnect'
+    ) {
+
+      console.log(
+        '[Console] Manual reconnect requested'
+      );
+
+      bot.end();
+
+    } else {
+
+      bot.chat(
+        trimmed
+      );
+
+    }
+
   }
-
-  const trimmed =
-    line.trim();
-
-  if (
-    trimmed.startsWith('say ')
-  ) {
-
-    bot.chat(
-      trimmed.slice(4)
-    );
-
-  } else if (
-    trimmed.startsWith('cmd ')
-  ) {
-
-    bot.chat(
-      '/' +
-      trimmed.slice(4)
-    );
-
-  } else if (
-    trimmed === 'status'
-  ) {
-
-    console.log(
-      `Connected: ${botState.connected}, Uptime: ${formatUptime(
-        Math.floor(
-          (Date.now() -
-            botState.startTime) /
-          1000
-        )
-      )}`
-    );
-
-  } else if (
-    trimmed === 'reconnect'
-  ) {
-
-    console.log(
-      '[Console] Manual reconnect requested'
-    );
-
-    bot.end();
-
-  } else {
-
-    bot.chat(trimmed);
-  }
-});
+);
 
 // ============================================================
 // DISCORD WEBHOOK
@@ -1771,37 +2416,59 @@ function sendDiscordWebhook(
 
   const payload =
     JSON.stringify({
-      username: config.name,
-      embeds: [{
-        description: content,
-        color: color,
-        timestamp:
-          new Date().toISOString(),
-        footer: {
-          text: 'Slobos AFK Bot'
+
+      username:
+        config.name,
+
+      embeds: [
+
+        {
+          description:
+            content,
+
+          color:
+            color,
+
+          timestamp:
+            new Date().toISOString(),
+
+          footer: {
+            text:
+              'Slobos AFK Bot'
+          }
         }
-      }]
+
+      ]
+
     });
 
   const options = {
+
     hostname:
       urlParts.hostname,
 
-    port: 443,
+    port:
+      443,
 
     path:
       urlParts.pathname +
       urlParts.search,
 
-    method: 'POST',
+    method:
+      'POST',
 
     headers: {
+
       'Content-Type':
         'application/json',
 
       'Content-Length':
-        payload.length
+        Buffer.byteLength(
+          payload
+        )
+
     }
+
   };
 
   const req =
@@ -1818,10 +2485,14 @@ function sendDiscordWebhook(
         '[Discord] Error sending webhook:',
         e.message
       );
+
     }
   );
 
-  req.write(payload);
+  req.write(
+    payload
+  );
+
   req.end();
 }
 
@@ -1837,9 +2508,16 @@ process.on(
     );
 
     botState.errors.push({
-      type: 'uncaught',
-      message: err.message,
-      time: Date.now()
+
+      type:
+        'uncaught',
+
+      message:
+        err.message,
+
+      time:
+        Date.now()
+
     });
 
     if (
@@ -1848,10 +2526,15 @@ process.on(
 
       clearAllIntervals();
 
-      setTimeout(() => {
-        scheduleReconnect();
-      }, 1000);
+      setTimeout(
+        () => {
+          scheduleReconnect();
+        },
+        1000
+      );
+
     }
+
   }
 );
 
@@ -1864,10 +2547,18 @@ process.on(
     );
 
     botState.errors.push({
-      type: 'rejection',
-      message: String(reason),
-      time: Date.now()
+
+      type:
+        'rejection',
+
+      message:
+        String(reason),
+
+      time:
+        Date.now()
+
     });
+
   }
 );
 
@@ -1882,7 +2573,10 @@ process.on(
       '[System] SIGTERM received.'
     );
 
-    process.exit(0);
+    process.exit(
+      0
+    );
+
   }
 );
 
@@ -1894,7 +2588,10 @@ process.on(
       '[System] Manual stop requested. Exiting...'
     );
 
-    process.exit(0);
+    process.exit(
+      0
+    );
+
   }
 );
 
@@ -1906,7 +2603,7 @@ console.log(
 );
 
 console.log(
-  '  Minecraft AFK Bot v2.3 - Resource Pack Fix'
+  '  Minecraft AFK Bot v2.4 - Paper 1.21.11 Fix'
 );
 
 console.log(
@@ -1930,7 +2627,11 @@ console.log(
 );
 
 console.log(
-  'Resource Pack: OPTIONAL / DECLINED'
+  'Resource Pack: OPTIONAL / NOT DOWNLOADED'
+);
+
+console.log(
+  'Configuration Fix: select_known_packs ENABLED'
 );
 
 console.log(
